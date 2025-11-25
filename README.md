@@ -2,7 +2,7 @@
 
 A production-ready AI-powered chat application built on Cloudflare Workers, Durable Objects, and Workers AI. This application provides an intelligent Cloudflare infrastructure architect assistant with persistent conversation memory and real-time insights.
 
-## 🌐 Live Deployment
+## Live Deployment
 
 **Live Application:** [https://cf-ai-infrastructure-architect.vercel.app/](https://cf-ai-infrastructure-architect.vercel.app/)
 
@@ -175,10 +175,6 @@ npx wrangler deploy
 ├── tsconfig.worker.json    # TypeScript config for worker
 └── README.md               # This file
 ```
-
-## License
-
-MIT
 
 ## AI-Assisted Development
 
