@@ -59,7 +59,7 @@ export function ChatInput({
         {/* Input Form */}
         <form onSubmit={onSubmit} className="flex gap-3 items-end">
           <div className="flex-1 relative">
-            <div className="relative rounded-2xl bg-gray-900/50 border border-gray-800/50 hover:border-gray-700/50 focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/20 transition-all duration-200">
+            <div className="relative rounded-2xl bg-gray-900/50 border border-gray-800/50 hover:border-gray-700/50 focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/20 focus-within:shadow-lg focus-within:shadow-orange-500/10 transition-all duration-300">
               <textarea
                 value={input}
                 onChange={(e) => onInputChange(e.target.value)}
@@ -123,7 +123,7 @@ export function ChatInput({
               "bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600",
               "text-white font-medium text-[15px]",
               "disabled:opacity-40 disabled:cursor-not-allowed",
-              "transition-all duration-200 hover:shadow-lg hover:shadow-orange-500/20",
+              "transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/20 hover:scale-105 active:scale-95",
               "flex items-center justify-center gap-2 min-w-[80px] sm:min-w-[100px]"
             )}
           >

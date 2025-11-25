@@ -39,7 +39,8 @@ export function ChatHeader({ onNewChat, onClearChat, messageCount = 0, onToggleI
                 size="sm"
                 className={cn(
                   "h-8 w-8 p-0 lg:hidden text-gray-400 hover:text-white",
-                  "hover:bg-gray-800/50 border border-gray-800/50"
+                  "hover:bg-gray-800/50 border border-gray-800/50",
+                  "transition-all duration-200 hover:scale-105 active:scale-95"
                 )}
               >
                 <PanelLeft className="h-4 w-4" />
@@ -52,7 +53,8 @@ export function ChatHeader({ onNewChat, onClearChat, messageCount = 0, onToggleI
                 size="sm"
                 className={cn(
                   "h-8 px-3 text-xs text-gray-400 hover:text-white",
-                  "hover:bg-gray-800/50 border border-gray-800/50"
+                  "hover:bg-gray-800/50 border border-gray-800/50",
+                  "transition-all duration-200 hover:scale-105 active:scale-95"
                 )}
                 title="Chat History"
               >
@@ -68,7 +70,8 @@ export function ChatHeader({ onNewChat, onClearChat, messageCount = 0, onToggleI
                   size="sm"
                   className={cn(
                     "h-8 px-3 text-xs text-gray-400 hover:text-white",
-                    "hover:bg-gray-800/50 border border-gray-800/50"
+                    "hover:bg-gray-800/50 border border-gray-800/50",
+                    "transition-all duration-200 hover:scale-105 active:scale-95"
                   )}
                 >
                   <Plus className="h-3.5 w-3.5 mr-1.5" />
@@ -82,7 +85,8 @@ export function ChatHeader({ onNewChat, onClearChat, messageCount = 0, onToggleI
                   size="sm"
                   className={cn(
                     "h-8 px-3 text-xs text-gray-400 hover:text-red-400",
-                    "hover:bg-red-500/10 border border-gray-800/50"
+                    "hover:bg-red-500/10 border border-gray-800/50",
+                    "transition-all duration-200 hover:scale-105 active:scale-95"
                   )}
                 >
                   <Trash2 className="h-3.5 w-3.5" />

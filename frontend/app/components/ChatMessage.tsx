@@ -25,7 +25,7 @@ export function ChatMessage({ role, content, isStreaming = false }: ChatMessageP
   return (
     <div
       className={cn(
-        "group w-full transition-all duration-300 animate-in fade-in slide-in-from-bottom-2",
+        "group w-full transition-all duration-300",
         isUser ? "bg-gray-900/20" : "bg-transparent"
       )}
     >

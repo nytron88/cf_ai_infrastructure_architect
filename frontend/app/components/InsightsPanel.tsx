@@ -36,13 +36,11 @@ export function InsightsPanel({
         "flex-shrink-0 w-full lg:w-80 border-r border-gray-800/50 bg-black/95 backdrop-blur-xl p-4 sm:p-6",
         "flex flex-col gap-4 sm:gap-5",
         "lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto scroll-smooth",
-        isCollapsed && "lg:w-16"
+        "animate-in slide-in-from-left duration-300"
       )}
     >
-      {!isCollapsed && (
-        <>
-          {/* Header */}
-          <div className="flex flex-col gap-3 pb-5 border-b border-gray-800/50">
+      {/* Header */}
+      <div className="flex flex-col gap-3 pb-5 border-b border-gray-800/50 animate-in fade-in slide-in-from-left duration-300">
             <div>
               <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-medium">
                 Architecture Brief
@@ -61,12 +59,15 @@ export function InsightsPanel({
           </div>
 
           {/* Summary */}
-          <section className="rounded-xl border border-gray-800/50 bg-gray-900/30 p-4 hover:bg-gray-900/40 transition-colors duration-200">
-            <h3 className="text-xs font-semibold tracking-wide text-orange-400 uppercase mb-3">
+          <section className="rounded-xl border border-gray-800/50 bg-gray-900/30 p-4 hover:bg-gray-900/40 hover:border-orange-500/30 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2">
+            <h3 className="text-xs font-semibold tracking-wide text-orange-400 uppercase mb-3 flex items-center gap-2">
+              <span className="h-1 w-1 rounded-full bg-orange-400 animate-pulse"></span>
               Summary
             </h3>
             <p className="text-sm leading-relaxed text-gray-200">
-              {insights.summary || "Start designing your infrastructure to see a summary here."}
+              {insights.summary || (
+                <span className="text-gray-500 italic">Start designing your infrastructure to see a summary here.</span>
+              )}
             </p>
           </section>
 
@@ -91,15 +92,17 @@ export function InsightsPanel({
 
           {/* Recommendations */}
           {recommendations.products.length > 0 && (
-            <section className="border border-gray-800/50 rounded-xl p-4 bg-gray-900/30 hover:bg-gray-900/40 transition-colors duration-200">
-              <h3 className="text-xs font-semibold tracking-wide text-orange-400 uppercase mb-4">
+            <section className="border border-gray-800/50 rounded-xl p-4 bg-gray-900/30 hover:bg-gray-900/40 hover:border-orange-500/30 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2">
+              <h3 className="text-xs font-semibold tracking-wide text-orange-400 uppercase mb-4 flex items-center gap-2">
+                <span className="h-1 w-1 rounded-full bg-orange-400"></span>
                 Recommended Stack
               </h3>
               <ul className="space-y-4">
                 {recommendations.products.map((product, index) => (
                   <li
                     key={`${product.name}-${index}`}
-                    className="pb-4 border-b border-gray-800/50 last:border-0 last:pb-0"
+                    className="pb-4 border-b border-gray-800/50 last:border-0 last:pb-0 animate-in fade-in slide-in-from-left duration-300 hover:translate-x-1 transition-transform"
+                    style={{ animationDelay: `${index * 100}ms` }}
                   >
                     <strong className="block text-sm text-white mb-1.5 font-semibold">{product.name}</strong>
                     <p className="text-xs text-gray-300 mb-2.5 leading-relaxed">{product.reason}</p>
@@ -107,9 +110,9 @@ export function InsightsPanel({
                       href={product.docsUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs text-orange-400 hover:text-orange-300 no-underline hover:underline transition-colors font-medium"
+                      className="inline-flex items-center gap-1.5 text-xs text-orange-400 hover:text-orange-300 no-underline hover:underline transition-all duration-200 font-medium hover:gap-2"
                     >
-                      Docs <span>↗</span>
+                      Docs <span className="transition-transform duration-200 inline-block">↗</span>
                     </a>
                   </li>
                 ))}
@@ -119,25 +122,30 @@ export function InsightsPanel({
 
           {/* Workflows */}
           {recommendations.workflows.length > 0 && (
-            <section className="border border-gray-800/50 rounded-xl p-4 bg-gray-900/30 hover:bg-gray-900/40 transition-colors duration-200">
-              <h3 className="text-xs font-semibold tracking-wide text-orange-400 uppercase mb-4">
+            <section className="border border-gray-800/50 rounded-xl p-4 bg-gray-900/30 hover:bg-gray-900/40 hover:border-orange-500/30 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2">
+              <h3 className="text-xs font-semibold tracking-wide text-orange-400 uppercase mb-4 flex items-center gap-2">
+                <span className="h-1 w-1 rounded-full bg-orange-400"></span>
                 Deployment Plan
               </h3>
               <ol className="space-y-2.5 pl-5 list-decimal text-sm text-gray-200 marker:text-orange-400/60">
                 {recommendations.workflows.map((step, index) => (
-                  <li key={`workflow-${index}`} className="leading-relaxed pl-1">{step}</li>
+                  <li 
+                    key={`workflow-${index}`} 
+                    className="leading-relaxed pl-1 animate-in fade-in slide-in-from-left duration-300"
+                    style={{ animationDelay: `${index * 80}ms` }}
+                  >
+                    {step}
+                  </li>
                 ))}
               </ol>
             </section>
           )}
-        </>
-      )}
 
       {/* Mobile Close Button */}
       {onToggle && (
         <button
           onClick={onToggle}
-          className="lg:hidden mt-auto p-3 rounded-lg border border-gray-800/50 bg-gray-900/50 hover:bg-gray-800/50 transition-colors text-gray-400 hover:text-white"
+          className="lg:hidden mt-auto p-3 rounded-lg border border-gray-800/50 bg-gray-900/50 hover:bg-gray-800/50 transition-all duration-200 hover:scale-105 active:scale-95 text-gray-400 hover:text-white"
           aria-label="Close panel"
         >
           <span className="text-sm font-medium">Close</span>

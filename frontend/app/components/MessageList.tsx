@@ -58,7 +58,13 @@ export function MessageList({ messages, isTyping = false }: MessageListProps) {
         ) : (
           <>
             {messages.map((message, index) => (
-              <ChatMessage key={`${message.role}-${index}`} {...message} />
+              <div
+                key={`${message.role}-${index}`}
+                className="animate-in fade-in slide-in-from-bottom-2"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <ChatMessage {...message} />
+              </div>
             ))}
             {isTyping && <TypingIndicator />}
             <div ref={messagesEndRef} className="h-4" />

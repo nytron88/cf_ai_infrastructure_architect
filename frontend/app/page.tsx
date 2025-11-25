@@ -8,6 +8,7 @@ import { InsightsPanel } from "./components/InsightsPanel";
 import { SessionList } from "./components/SessionList";
 import { useChat } from "./hooks/useChat";
 import { useSpeechRecognition } from "./hooks/useSpeechRecognition";
+import { cn } from "@/lib/utils";
 
 export default function Page() {
   const [input, setInput] = useState("");
@@ -46,16 +47,21 @@ export default function Page() {
     <div className="min-h-screen bg-black">
       <div className="flex h-screen overflow-hidden">
         {/* Sidebar - Insights Panel */}
-        {/* Always render, use CSS for visibility - prevents hydration mismatch */}
-        <div className={showInsightsMobile ? "block absolute inset-0 z-20 lg:relative lg:z-auto lg:block" : "hidden lg:block"}>
+        <div className={cn(
+          "flex-shrink-0",
+          showInsightsMobile ? "block absolute inset-0 z-20 lg:relative lg:z-auto lg:block" : "hidden lg:block"
+        )}>
           {showInsightsMobile && (
-            <div className="absolute inset-0 bg-black/50 lg:hidden z-10" onClick={() => setShowInsightsMobile(false)} />
+            <div 
+              className="absolute inset-0 bg-black/50 lg:hidden z-10 backdrop-blur-sm transition-opacity duration-300" 
+              onClick={() => setShowInsightsMobile(false)} 
+            />
           )}
-          <div className="relative h-full lg:h-auto z-20">
+          <div className="relative h-full lg:h-auto z-20 animate-in slide-in-from-left duration-300">
             <InsightsPanel 
               insights={insights} 
               recommendations={recommendations}
-              isCollapsed={!showInsightsMobile}
+              isCollapsed={false}
               onToggle={() => setShowInsightsMobile(!showInsightsMobile)}
             />
           </div>
