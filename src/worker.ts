@@ -392,7 +392,7 @@ export default {
       default:
         return jsonResponse(
           {
-            message: "AI Memory Chatbot Worker",
+            message: "CF AI Infrastructure Architect Worker",
             endpoints: ["/chat", "/memory", "/insights", "/recommendations", "/health"],
           },
           request

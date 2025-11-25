@@ -1,4 +1,4 @@
-# AI Memory Chatbot (Cloudflare Workers + Durable Objects + Workers AI)
+# CF AI Infrastructure Architect (Cloudflare Workers + Durable Objects + Workers AI)
 
 Minimal end-to-end example that satisfies Cloudflare's AI App assignment. It combines:
 
