@@ -1,0 +1,12 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="6" fill="#F97316"/>
+  <!-- Sparkle/Star icon with plus signs -->
+  <g transform="translate(16, 16)">
+    <!-- Main 4-pointed star -->
+    <path d="M0 -6L1.5 0L6 0L2.5 2.5L4 6L0 4L-4 6L-2.5 2.5L-6 0L-1.5 0Z" fill="white" opacity="0.95"/>
+    <!-- Plus sign top right -->
+    <path d="M4 -2H5V-1H4V-2ZM4 1H5V2H4V1ZM3 -1.5H4.5V-0.5H3V-1.5Z" fill="white" opacity="0.95"/>
+    <!-- Plus sign bottom left -->
+    <path d="M-4 -2H-3V-1H-4V-2ZM-4 1H-3V2H-4V1ZM-4.5 -1.5H-3V-0.5H-4.5V-1.5Z" fill="white" opacity="0.95"/>
+  </g>
+</svg>
