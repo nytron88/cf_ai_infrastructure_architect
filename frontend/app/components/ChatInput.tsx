@@ -29,18 +29,18 @@ export function ChatInput({
   voiceError,
 }: ChatInputProps) {
   return (
-    <div className="border-t border-gray-800/50 bg-black/95 backdrop-blur-xl">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-5">
+    <div className="border-t border-gray-800/50 bg-black/95 backdrop-blur-xl safe-area-inset-bottom">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-5">
         {/* Voice Status */}
         {(isListening || voiceTranscript || voiceError) && (
-          <div className="mb-4 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <div className="mb-3 sm:mb-4 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
             {isListening && (
-              <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                <span className="relative flex h-2.5 w-2.5">
+              <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
+                  <span className="relative inline-flex rounded-full h-full w-full bg-orange-500"></span>
                 </span>
-                <span className="text-sm text-gray-300">
+                <span className="text-xs sm:text-sm text-gray-300 truncate flex-1">
                   Listening...
                   {voiceTranscript && (
                     <span className="ml-2 text-orange-300 italic">"{voiceTranscript}"</span>
@@ -49,17 +49,17 @@ export function ChatInput({
               </div>
             )}
             {voiceError && (
-              <div className="px-4 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20">
-                <p className="text-sm text-red-400">{voiceError}</p>
+              <div className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-red-500/10 border border-red-500/20">
+                <p className="text-xs sm:text-sm text-red-400">{voiceError}</p>
               </div>
             )}
           </div>
         )}
 
         {/* Input Form */}
-        <form onSubmit={onSubmit} className="flex gap-3 items-end">
-          <div className="flex-1 relative">
-            <div className="relative rounded-2xl bg-gray-900/50 border border-gray-800/50 hover:border-gray-700/50 focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/20 focus-within:shadow-lg focus-within:shadow-orange-500/10 transition-all duration-300">
+        <form onSubmit={onSubmit} className="flex gap-2 sm:gap-3 items-end">
+          <div className="flex-1 relative min-w-0">
+            <div className="relative rounded-xl sm:rounded-2xl bg-gray-900/50 border border-gray-800/50 hover:border-gray-700/50 focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/20 focus-within:shadow-lg focus-within:shadow-orange-500/10 transition-all duration-300">
               <textarea
                 value={input}
                 onChange={(e) => onInputChange(e.target.value)}
@@ -67,9 +67,9 @@ export function ChatInput({
                 disabled={isSending}
                 rows={1}
                 className={cn(
-                  "w-full px-5 py-4 pr-12 bg-transparent text-white placeholder:text-gray-500",
-                  "resize-none overflow-hidden min-h-[56px] max-h-[200px]",
-                  "focus:outline-none text-[15px] leading-6",
+                  "w-full px-3 sm:px-4 md:px-5 py-3 sm:py-4 pr-10 sm:pr-12 bg-transparent text-white placeholder:text-gray-500",
+                  "resize-none overflow-hidden min-h-[48px] sm:min-h-[52px] md:min-h-[56px] max-h-[200px]",
+                  "focus:outline-none text-sm sm:text-[15px] leading-6",
                   "disabled:opacity-50 disabled:cursor-not-allowed"
                 )}
                 onKeyDown={(e) => {
@@ -99,17 +99,18 @@ export function ChatInput({
                   onClick={onToggleListening}
                   disabled={isSending && !isListening}
                   className={cn(
-                    "absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-lg",
+                    "absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 rounded-lg",
                     "flex items-center justify-center transition-all duration-200",
-                    "text-gray-400 hover:text-white hover:bg-gray-800/50",
+                    "text-gray-400 hover:text-white hover:bg-gray-800/50 active:scale-95",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
                     isListening && "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30"
                   )}
+                  aria-label={isListening ? "Stop listening" : "Start voice input"}
                 >
                   {isListening ? (
-                    <Square className="h-4 w-4" />
+                    <Square className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   ) : (
-                    <Mic className="h-4 w-4" />
+                    <Mic className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   )}
                 </button>
               )}
@@ -119,31 +120,41 @@ export function ChatInput({
             type="submit"
             disabled={isSending || !input.trim()}
             className={cn(
-              "h-[56px] px-4 sm:px-6 rounded-2xl",
-              "bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600",
-              "text-white font-medium text-[15px]",
+              "h-[48px] sm:h-[52px] md:h-[56px] w-[48px] sm:w-[56px] md:w-auto",
+              "px-3 sm:px-4 md:px-6 rounded-xl sm:rounded-2xl",
+              "bg-gradient-to-r from-orange-600 to-orange-500",
+              "hover:from-orange-700 hover:to-orange-600",
+              "active:from-orange-800 active:to-orange-700",
+              "text-white font-medium text-sm sm:text-[15px]",
               "disabled:opacity-40 disabled:cursor-not-allowed",
-              "transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/20 hover:scale-105 active:scale-95",
-              "flex items-center justify-center gap-2 min-w-[80px] sm:min-w-[100px]"
+              "transition-all duration-300",
+              "hover:shadow-lg hover:shadow-orange-500/20",
+              "active:scale-95",
+              "flex items-center justify-center",
+              "relative overflow-hidden group"
             )}
+            aria-label="Send message"
           >
+            {/* Shine effect on hover */}
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
+            
             {isSending ? (
               <>
-                <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
-                <span className="hidden sm:inline">Sending</span>
+                <span className="animate-spin h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent rounded-full"></span>
+                <span className="hidden md:inline ml-2">Sending</span>
               </>
             ) : (
               <>
-                <Send className="h-4 w-4" />
-                <span className="hidden sm:inline">Send</span>
+                <Send className="h-4 w-4 sm:h-5 sm:w-5 md:mr-2" />
+                <span className="hidden md:inline">Send</span>
               </>
             )}
           </button>
         </form>
 
-        {/* Voice Hint */}
+        {/* Voice Hint - Hidden on very small screens */}
         {supportsVoice && !isListening && !voiceError && (
-          <p className="text-xs text-gray-500 mt-3 text-center">
+          <p className="text-xs text-gray-500 mt-2 sm:mt-3 text-center hidden sm:block">
             Press <kbd className="px-1.5 py-0.5 rounded bg-gray-800/50 border border-gray-700/50 text-[11px]">Enter</kbd> to send, <kbd className="px-1.5 py-0.5 rounded bg-gray-800/50 border border-gray-700/50 text-[11px]">Shift + Enter</kbd> for new line
           </p>
         )}

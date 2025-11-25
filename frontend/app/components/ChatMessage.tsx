@@ -29,16 +29,16 @@ export function ChatMessage({ role, content, isStreaming = false }: ChatMessageP
         isUser ? "bg-gray-900/20" : "bg-transparent"
       )}
     >
-      <div className="flex gap-3 sm:gap-4 max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <div className="flex gap-2 sm:gap-3 md:gap-4 max-w-4xl mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8">
         {/* Avatar */}
         <div className="flex-shrink-0">
           {isAssistant ? (
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 via-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
-              <span className="text-white text-sm font-semibold">AI</span>
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-orange-500 via-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
+              <span className="text-white text-xs sm:text-sm font-semibold">AI</span>
             </div>
           ) : (
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center">
-              <span className="text-white text-sm font-semibold">U</span>
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center">
+              <span className="text-white text-xs sm:text-sm font-semibold">U</span>
             </div>
           )}
         </div>
@@ -47,7 +47,7 @@ export function ChatMessage({ role, content, isStreaming = false }: ChatMessageP
         <div className="flex-1 min-w-0 pt-0.5">
           <div className="prose prose-invert max-w-none">
             <div className={cn(
-              "leading-7 text-[15px]",
+              "leading-6 sm:leading-7 text-sm sm:text-[15px]",
               isAssistant ? "text-gray-100" : "text-gray-200"
             )}>
               <ReactMarkdown

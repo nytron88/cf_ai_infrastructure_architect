@@ -44,20 +44,20 @@ export default function Page() {
   );
 
   return (
-    <div className="min-h-screen bg-black">
-      <div className="flex h-screen overflow-hidden">
+    <div className="min-h-screen bg-black overflow-hidden">
+      <div className="flex h-screen max-h-screen overflow-hidden">
         {/* Sidebar - Insights Panel */}
         <div className={cn(
           "flex-shrink-0",
-          showInsightsMobile ? "block absolute inset-0 z-20 lg:relative lg:z-auto lg:block" : "hidden lg:block"
+          showInsightsMobile ? "block fixed inset-0 z-20 lg:relative lg:z-auto lg:block" : "hidden lg:block"
         )}>
           {showInsightsMobile && (
             <div 
-              className="absolute inset-0 bg-black/50 lg:hidden z-10 backdrop-blur-sm transition-opacity duration-300" 
+              className="fixed inset-0 bg-black/50 lg:hidden z-10 backdrop-blur-sm transition-opacity duration-300" 
               onClick={() => setShowInsightsMobile(false)} 
             />
           )}
-          <div className="relative h-full lg:h-auto z-20 animate-in slide-in-from-left duration-300">
+          <div className="relative h-full lg:h-auto z-20 animate-in slide-in-from-left duration-300 max-h-screen overflow-hidden">
             <InsightsPanel 
               insights={insights} 
               recommendations={recommendations}

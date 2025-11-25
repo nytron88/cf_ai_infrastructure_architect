@@ -33,20 +33,22 @@ export function InsightsPanel({
   return (
     <aside
       className={cn(
-        "flex-shrink-0 w-full lg:w-80 border-r border-gray-800/50 bg-black/95 backdrop-blur-xl p-4 sm:p-6",
-        "flex flex-col gap-4 sm:gap-5",
+        "flex-shrink-0 w-full lg:w-80 border-r border-gray-800/50 bg-black/95 backdrop-blur-xl",
+        "p-3 sm:p-4 md:p-6",
+        "flex flex-col gap-3 sm:gap-4 md:gap-5",
         "lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto scroll-smooth",
-        "animate-in slide-in-from-left duration-300"
+        "animate-in slide-in-from-left duration-300",
+        "max-h-screen overflow-y-auto"
       )}
     >
-      {/* Header */}
-      <div className="flex flex-col gap-3 pb-5 border-b border-gray-800/50 animate-in fade-in slide-in-from-left duration-300">
+          {/* Header */}
+      <div className="flex flex-col gap-2 sm:gap-3 pb-3 sm:pb-4 md:pb-5 border-b border-gray-800/50 animate-in fade-in slide-in-from-left duration-300">
             <div>
-              <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-medium">
+              <p className="text-xs text-gray-500 mb-1.5 sm:mb-2 uppercase tracking-wider font-medium">
                 Architecture Brief
               </p>
-              <h2 className="text-lg font-semibold text-white mb-1">Project Overview</h2>
-              <p className="text-xs text-gray-400 leading-relaxed">
+              <h2 className="text-base sm:text-lg font-semibold text-white mb-1">Project Overview</h2>
+              <p className="text-xs text-gray-400 leading-relaxed hidden sm:block">
                 Key decisions, tasks, and recommended Cloudflare stack.
               </p>
             </div>
