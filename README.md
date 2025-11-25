@@ -49,9 +49,15 @@ A production-ready AI-powered chat application built on Cloudflare Workers, Dura
    - Enable: **Cloudflare AI (AI Gateway)**
    - Enable: **Durable Objects**
 
-5. **Start frontend:**
+5. **Configure frontend environment:**
    ```bash
    cd frontend
+   cp .env.example .env.local
+   # Edit .env.local and set NEXT_PUBLIC_API_BASE to your deployed worker URL
+   ```
+
+6. **Start frontend:**
+   ```bash
    npm run dev
    ```
 
@@ -78,9 +84,21 @@ Environment variables (set in `.dev.vars` for local or Cloudflare dashboard for 
 
 ### Frontend Configuration
 
-Environment variables (set in `frontend/.env.local`):
-- `NEXT_PUBLIC_API_BASE` - Worker API URL (if not set, uses relative URLs)
-- `NEXT_PUBLIC_DEV_API_BASE` - Local worker URL for development (default: `http://127.0.0.1:8787`)
+1. **Copy the example environment file:**
+   ```bash
+   cd frontend
+   cp .env.example .env.local
+   ```
+
+2. **Edit `frontend/.env.local` and set your worker URL:**
+   ```bash
+   NEXT_PUBLIC_API_BASE=https://your-worker.your-subdomain.workers.dev
+   ```
+
+   **Note:** The example file includes the default deployed worker URL. Update it to match your deployment.
+
+3. **Optional environment variables:**
+   - `NEXT_PUBLIC_DEV_API_BASE` - Local worker URL for development (default: `http://127.0.0.1:8787`)
 
 ## Development
 
