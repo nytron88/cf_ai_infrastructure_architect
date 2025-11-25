@@ -144,9 +144,9 @@ export function InsightsPanel({
           )}
 
       {/* Mobile Close Button */}
-      {onToggle && (
+      {_onToggle && (
         <button
-          onClick={onToggle}
+          onClick={_onToggle}
           className="lg:hidden mt-auto p-3 rounded-lg border border-gray-800/50 bg-gray-900/50 hover:bg-gray-800/50 transition-all duration-200 hover:scale-105 active:scale-95 text-gray-400 hover:text-white"
           aria-label="Close panel"
         >
