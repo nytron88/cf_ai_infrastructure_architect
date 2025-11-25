@@ -1,0 +1,8 @@
+# Local Development Variables
+# Copy this file to .dev.vars (which is gitignored) for local development
+# These variables are only used when running `wrangler dev`
+
+# Add any local development secrets here
+# Example:
+# API_KEY=your_local_api_key
+# SECRET_TOKEN=your_local_secret
