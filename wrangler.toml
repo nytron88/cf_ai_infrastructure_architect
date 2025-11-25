@@ -15,4 +15,5 @@ new_sqlite_classes = ["MemoryStore"]
 
 [vars]
 MODEL_ID = "@cf/meta/llama-3.1-8b-instruct"
+# MAX_TOKENS = "4096"  # Optional: Maximum tokens for AI responses (default: 4096 for chat, 2048 for insights/recommendations)
 

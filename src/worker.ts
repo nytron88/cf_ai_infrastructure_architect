@@ -29,6 +29,7 @@ export interface Env {
   MEMORY_SESSIONS: DurableObjectNamespace;
   MODEL_ID?: string;
   ALLOWED_ORIGINS?: string; // Comma-separated list of allowed origins
+  MAX_TOKENS?: string; // Maximum tokens for AI responses (default: 4096)
 }
 
 const allowOrigin = (request: Request, env: Env): string | null => {
@@ -283,12 +284,14 @@ const buildInsights = async (
   
   const recent = history.slice(-12);
   const modelId = env.MODEL_ID || "@cf/meta/llama-3.1-8b-instruct";
+  const maxTokens = env.MAX_TOKENS ? Math.min(parseInt(env.MAX_TOKENS, 10), 2048) : 2048;
   try {
     const result = await env.AI.run(modelId, {
       messages: [
         { role: "system", content: INSIGHT_PROMPT },
         { role: "user", content: JSON.stringify(recent) },
       ],
+      max_tokens: maxTokens, // Allow longer insight responses
     });
     const raw =
       (result as Record<string, string>)?.response ||
@@ -319,12 +322,14 @@ const buildRecommendations = async (
   
   const recent = history.slice(-10);
   const modelId = env.MODEL_ID || "@cf/meta/llama-3.1-8b-instruct";
+  const maxTokens = env.MAX_TOKENS ? Math.min(parseInt(env.MAX_TOKENS, 10), 2048) : 2048;
   try {
     const result = await env.AI.run(modelId, {
       messages: [
         { role: "system", content: RECOMMEND_PROMPT },
         { role: "user", content: JSON.stringify(recent) },
       ],
+      max_tokens: maxTokens, // Allow longer recommendation responses
     });
     const raw =
       (result as Record<string, string>)?.response ||
@@ -444,9 +449,13 @@ const handleChatRequest = async (request: Request, env: Env) => {
   }
 
   const modelId = env.MODEL_ID || "@cf/meta/llama-3.1-8b-instruct";
+  const maxTokens = env.MAX_TOKENS ? parseInt(env.MAX_TOKENS, 10) : 4096;
   let aiResponse = "";
   try {
-    const result = await env.AI.run(modelId, { messages: modelMessages });
+    const result = await env.AI.run(modelId, { 
+      messages: modelMessages,
+      max_tokens: maxTokens, // Allow longer responses (default is often ~512)
+    });
     aiResponse =
       (result as Record<string, string>)?.response ||
       (result as Record<string, string>)?.output ||
