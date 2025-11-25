@@ -94,19 +94,24 @@ export function useSpeechRecognition(
         }
       }
 
-      // Show interim results
+      // Show interim results as they come in
       if (interim) {
         setVoiceTranscript(interim);
       }
 
-      // Handle final transcript
+      // Handle final transcript - show it before clearing
       if (finalTranscript.trim()) {
-        setVoiceTranscript("");
-        stopRecognition();
+        // Show the final transcript so user can see what was recognized
+        setVoiceTranscript(finalTranscript.trim());
         // Use ref to avoid stale closure
         onFinalTranscriptRef.current(finalTranscript.trim());
-      } else if (!interim && finalTranscript) {
-        // If we have final but no interim, still show it briefly
+        // Clear transcript and stop after a brief delay so user can see it
+        setTimeout(() => {
+          setVoiceTranscript("");
+          stopRecognition();
+        }, 500);
+      } else if (finalTranscript && !interim) {
+        // If we have final but no interim, show it
         setVoiceTranscript(finalTranscript);
       }
     };
@@ -115,7 +120,9 @@ export function useSpeechRecognition(
       const errorCode = event.error;
       
       // Don't show error for "no-speech" if user manually stopped
-      if (errorCode === "no-speech" && !isListening) {
+      // Use a ref to check current state instead of closure
+      const currentIsListening = recognitionRef.current ? true : false;
+      if (errorCode === "no-speech" && !currentIsListening) {
         return;
       }
 
@@ -134,10 +141,16 @@ export function useSpeechRecognition(
 
     recognition.onend = () => {
       // Only reset if we're still supposed to be listening
-      // This prevents clearing state when manually stopped
-      if (isListening && !isStartingRef.current) {
-        setIsListening(false);
-        setVoiceTranscript("");
+      // Check if recognition is still active
+      if (recognitionRef.current && !isStartingRef.current) {
+        // Only clear if recognition ended unexpectedly (not manually stopped)
+        setIsListening((prev) => {
+          if (prev) {
+            setVoiceTranscript("");
+            return false;
+          }
+          return prev;
+        });
       }
       isStartingRef.current = false;
     };
@@ -147,7 +160,7 @@ export function useSpeechRecognition(
     return () => {
       stopRecognition();
     };
-  }, [describeSpeechError, stopRecognition, isListening]);
+  }, [describeSpeechError, stopRecognition]);
 
   const toggleListening = useCallback(() => {
     if (!supportsVoice) {

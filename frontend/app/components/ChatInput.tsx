@@ -29,35 +29,53 @@ export function ChatInput({
   return (
     <div className="border-t border-gray-800/50 bg-black/95 backdrop-blur-xl safe-area-inset-bottom">
       <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-5">
-        {/* Voice Status */}
-        {(isListening || voiceTranscript || voiceError) && (
-          <div className="mb-3 sm:mb-4 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
-            {isListening && (
-              <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-full w-full bg-orange-500"></span>
-                </span>
-                <span className="text-xs sm:text-sm text-gray-300 truncate flex-1">
-                  Listening...
-                  {voiceTranscript && (
-                    <span className="ml-2 text-orange-300 italic">&ldquo;{voiceTranscript}&rdquo;</span>
-                  )}
-                </span>
-              </div>
-            )}
-            {voiceError && (
-              <div className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-red-500/10 border border-red-500/20">
-                <p className="text-xs sm:text-sm text-red-400">{voiceError}</p>
-              </div>
-            )}
+        {/* Voice Status - Always show when listening */}
+        {isListening && (
+          <div className="mb-3 sm:mb-4">
+            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg bg-orange-500/20 border-2 border-orange-500 shadow-lg shadow-orange-500/30">
+              <span className="relative flex h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-full w-full bg-orange-500"></span>
+              </span>
+              <span className="text-sm sm:text-base text-orange-200 font-semibold flex-1">
+                {voiceTranscript ? (
+                  <>
+                    <span className="text-white">Listening:</span>{" "}
+                    <span className="italic">&ldquo;{voiceTranscript}&rdquo;</span>
+                  </>
+                ) : (
+                  "Start speaking..."
+                )}
+              </span>
+            </div>
+          </div>
+        )}
+        {/* Show transcript after recognition completes */}
+        {!isListening && voiceTranscript && (
+          <div className="mb-3 sm:mb-4 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
+              <span className="text-xs sm:text-sm text-orange-300 italic flex-1">&ldquo;{voiceTranscript}&rdquo;</span>
+            </div>
+          </div>
+        )}
+        {/* Voice Error */}
+        {voiceError && (
+          <div className="mb-3 sm:mb-4 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-red-500/10 border border-red-500/20">
+              <p className="text-xs sm:text-sm text-red-400">{voiceError}</p>
+            </div>
           </div>
         )}
 
         {/* Input Form */}
         <form onSubmit={onSubmit} className="flex gap-2 sm:gap-3 items-end">
           <div className="flex-1 relative min-w-0">
-            <div className="relative rounded-xl sm:rounded-2xl bg-gray-900/50 border border-gray-800/50 hover:border-gray-700/50 focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/20 focus-within:shadow-lg focus-within:shadow-orange-500/10 transition-all duration-300">
+            <div className={cn(
+              "relative rounded-xl sm:rounded-2xl bg-gray-900/50 border transition-all duration-200",
+              isListening 
+                ? "border-orange-500/60 shadow-md shadow-orange-500/20"
+                : "border-gray-800/50 hover:border-gray-700/50 focus-within:border-orange-500/50 focus-within:ring-1 focus-within:ring-orange-500/20 focus-within:shadow-lg focus-within:shadow-orange-500/10"
+            )}>
               <textarea
                 value={input}
                 onChange={(e) => onInputChange(e.target.value)}
@@ -97,16 +115,17 @@ export function ChatInput({
                   onClick={onToggleListening}
                   disabled={isSending && !isListening}
                   className={cn(
-                    "absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 rounded-lg",
+                    "absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 rounded-lg",
                     "flex items-center justify-center transition-all duration-200",
-                    "text-gray-400 hover:text-white hover:bg-gray-800/50 active:scale-95",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
-                    isListening && "bg-orange-500/20 text-orange-400 hover:bg-orange-500/30"
+                    isListening 
+                      ? "h-10 w-10 sm:h-11 sm:w-11 bg-orange-500 text-white hover:bg-orange-600 shadow-lg shadow-orange-500/30"
+                      : "h-8 w-8 sm:h-9 sm:w-9 text-gray-400 hover:text-white hover:bg-gray-800/50 active:scale-95"
                   )}
                   aria-label={isListening ? "Stop listening" : "Start voice input"}
                 >
                   {isListening ? (
-                    <Square className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <Square className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={2.5} />
                   ) : (
                     <Mic className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   )}

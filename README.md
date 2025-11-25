@@ -2,6 +2,10 @@
 
 A production-ready AI-powered chat application built on Cloudflare Workers, Durable Objects, and Workers AI. This application provides an intelligent Cloudflare infrastructure architect assistant with persistent conversation memory and real-time insights.
 
+## 🌐 Live Deployment
+
+**Live Application:** [https://cf-ai-infrastructure-architect.vercel.app/](https://cf-ai-infrastructure-architect.vercel.app/)
+
 ## Features
 
 - **AI-Powered Chat**: Uses Workers AI with Llama 3.1 (`@cf/meta/llama-3.1-8b-instruct`) for intelligent responses
@@ -136,18 +140,26 @@ Copy these to `.dev.vars` (worker) and `.env.local` (frontend) for local develop
 
 ## Deployment
 
+### Live Application
+
+**Production Deployment:** [https://cf-ai-infrastructure-architect.vercel.app/](https://cf-ai-infrastructure-architect.vercel.app/)
+
+The application is deployed on Vercel with the Cloudflare Worker backend running on Cloudflare Workers.
+
 ### Worker Deployment
 
 ```bash
 npx wrangler deploy
 ```
 
-### Frontend Deployment (Cloudflare Pages)
+### Frontend Deployment (Vercel)
 
-1. Connect your repository to Cloudflare Pages
-2. Set build command: `npm run build`
-3. Set build output: `.next`
-4. Add environment variable: `NEXT_PUBLIC_API_BASE` (if needed)
+1. Connect your repository to Vercel
+2. Set build command: `cd frontend && npm run build`
+3. Set build output: `frontend/.next`
+4. Add environment variable: `NEXT_PUBLIC_API_BASE` pointing to your deployed Cloudflare Worker URL
+
+**Note:** The frontend can also be deployed to Cloudflare Pages using the same build configuration.
 
 ## Project Structure
 
