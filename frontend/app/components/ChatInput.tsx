@@ -120,34 +120,24 @@ export function ChatInput({
             type="submit"
             disabled={isSending || !input.trim()}
             className={cn(
-              "h-[48px] sm:h-[52px] md:h-[56px] w-[48px] sm:w-[56px] md:w-auto",
-              "px-3 sm:px-4 md:px-6 rounded-xl sm:rounded-2xl",
-              "bg-gradient-to-r from-orange-600 to-orange-500",
-              "hover:from-orange-700 hover:to-orange-600",
-              "active:from-orange-800 active:to-orange-700",
-              "text-white font-medium text-sm sm:text-[15px]",
-              "disabled:opacity-40 disabled:cursor-not-allowed",
-              "transition-all duration-300",
-              "hover:shadow-lg hover:shadow-orange-500/20",
-              "active:scale-95",
+              "h-[48px] w-[48px] sm:h-[52px] sm:w-[52px] md:h-[56px] md:w-[56px]",
+              "rounded-full",
+              "bg-orange-500 hover:bg-orange-600",
+              "active:bg-orange-700",
+              "text-white",
+              "disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-orange-500",
+              "transition-all duration-150 ease-out",
               "flex items-center justify-center",
-              "relative overflow-hidden group"
+              "shadow-sm hover:shadow-md",
+              "hover:scale-105 active:scale-100",
+              "group"
             )}
             aria-label="Send message"
           >
-            {/* Shine effect on hover */}
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></span>
-            
             {isSending ? (
-              <>
-                <span className="animate-spin h-4 w-4 sm:h-5 sm:w-5 border-2 border-white border-t-transparent rounded-full"></span>
-                <span className="hidden md:inline ml-2">Sending</span>
-              </>
+              <span className="animate-spin h-5 w-5 sm:h-5 sm:w-5 md:h-6 md:w-6 border-2 border-white/60 border-t-transparent rounded-full"></span>
             ) : (
-              <>
-                <Send className="h-4 w-4 sm:h-5 sm:w-5 md:mr-2" />
-                <span className="hidden md:inline">Send</span>
-              </>
+              <Send className="h-5 w-5 sm:h-5 sm:w-5 md:h-6 md:w-6" strokeWidth={2} />
             )}
           </button>
         </form>

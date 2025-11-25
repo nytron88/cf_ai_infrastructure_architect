@@ -116,20 +116,18 @@ export function SessionList({
     }
   };
 
-  // Always render the container to avoid hydration mismatch, use CSS for visibility
-  return (
-    <div className={isOpen ? "fixed inset-0 z-30 lg:relative lg:z-auto" : "hidden"}>
-      <div className="absolute inset-0 bg-black/80 lg:hidden" onClick={onClose} />
-      <div className="absolute right-0 top-0 h-full w-full max-w-sm bg-black border-l border-gray-800/50 lg:relative lg:max-w-none lg:w-80 flex flex-col">
+  const renderContent = () => (
+    <>
         <div className="p-4 sm:p-6 border-b border-gray-800/50">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-white">Chat History</h2>
             {onClose && (
               <button
                 onClick={onClose}
-                className="lg:hidden text-gray-400 hover:text-white"
+                className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-800/50 rounded-lg transition-colors"
+                aria-label="Close history"
               >
-                ✕
+                <span className="text-xl">✕</span>
               </button>
             )}
           </div>
@@ -195,8 +193,44 @@ export function SessionList({
             </div>
           )}
         </div>
+    </>
+  );
+
+  // Always render the container to avoid hydration mismatch, use CSS for visibility
+  return (
+    <>
+      {/* Mobile: Fixed overlay */}
+      <div className={cn(
+        isOpen ? "fixed inset-0 z-30" : "hidden",
+        "lg:hidden"
+      )}>
+        <div 
+          className="absolute inset-0 bg-black/80 backdrop-blur-sm z-10 transition-opacity duration-300" 
+          onClick={onClose} 
+        />
+        <div className={cn(
+          "absolute right-0 top-0 h-full w-full max-w-sm bg-black/95 backdrop-blur-xl border-l border-gray-800/50",
+          "flex flex-col z-20",
+          "animate-in slide-in-from-right duration-300"
+        )}>
+          {renderContent()}
+        </div>
       </div>
-    </div>
+
+      {/* Desktop: Sidebar */}
+      <div className={cn(
+        isOpen ? "block" : "hidden",
+        "hidden lg:block flex-shrink-0 w-80"
+      )}>
+        <div className={cn(
+          "h-full bg-black/95 backdrop-blur-xl border-l border-gray-800/50",
+          "flex flex-col",
+          "animate-in slide-in-from-right duration-300"
+        )}>
+          {renderContent()}
+        </div>
+      </div>
+    </>
   );
 }
 

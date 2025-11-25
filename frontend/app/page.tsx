@@ -67,14 +67,31 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Session History Panel */}
-        <SessionList
-          currentSessionId={sessionId}
-          onSelectSession={switchSession}
-          onDeleteSession={() => {}}
-          isOpen={showHistory}
-          onClose={() => setShowHistory(false)}
-        />
+        {/* Session History Panel - Sidebar on large screens */}
+        {showHistory && (
+          <div className="hidden lg:block flex-shrink-0">
+            <SessionList
+              currentSessionId={sessionId}
+              onSelectSession={switchSession}
+              onDeleteSession={() => {}}
+              isOpen={showHistory}
+              onClose={() => setShowHistory(false)}
+            />
+          </div>
+        )}
+
+        {/* Session History Panel - Overlay on mobile */}
+        {showHistory && (
+          <div className="lg:hidden">
+            <SessionList
+              currentSessionId={sessionId}
+              onSelectSession={switchSession}
+              onDeleteSession={() => {}}
+              isOpen={showHistory}
+              onClose={() => setShowHistory(false)}
+            />
+          </div>
+        )}
 
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col min-w-0 bg-black">

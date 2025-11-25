@@ -32,20 +32,22 @@ export function ChatHeader({ onNewChat, onClearChat, messageCount = 0, onToggleI
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             {onToggleInsights && (
               <Button
                 onClick={onToggleInsights}
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  "h-8 w-8 p-0 lg:hidden text-gray-400 hover:text-white",
+                  "h-10 w-10 p-0 lg:hidden text-gray-400 hover:text-white",
                   "hover:bg-gray-800/50 border border-gray-800/50",
-                  "transition-all duration-200 hover:scale-105 active:scale-95"
+                  "transition-all duration-200 hover:scale-105 active:scale-95",
+                  "flex items-center justify-center",
+                  "flex-shrink-0 rounded-lg"
                 )}
                 aria-label="Toggle insights panel"
               >
-                <PanelLeft className="h-4 w-4" />
+                <PanelLeft className="h-5 w-5" />
               </Button>
             )}
             {onToggleHistory && (
@@ -54,16 +56,18 @@ export function ChatHeader({ onNewChat, onClearChat, messageCount = 0, onToggleI
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  "h-8 w-8 sm:w-auto sm:px-3 text-xs text-gray-400 hover:text-white",
+                  "h-10 w-10 p-0 text-gray-400 hover:text-white",
                   "hover:bg-gray-800/50 border border-gray-800/50",
                   "transition-all duration-200 hover:scale-105 active:scale-95",
-                  "flex items-center justify-center"
+                  "flex items-center justify-center",
+                  "flex-shrink-0 rounded-lg",
+                  "md:h-8 md:w-auto md:px-3"
                 )}
                 title="Chat History"
                 aria-label="Chat History"
               >
-                <History className="h-3.5 w-3.5 sm:mr-1.5" />
-                <span className="hidden sm:inline">History</span>
+                <History className="h-5 w-5 md:h-3.5 md:w-3.5 md:mr-1.5" />
+                <span className="hidden md:inline text-xs">History</span>
               </Button>
             )}
             <div className="hidden sm:flex items-center gap-2">
@@ -99,7 +103,7 @@ export function ChatHeader({ onNewChat, onClearChat, messageCount = 0, onToggleI
                 </Button>
               )}
             </div>
-            <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
+            <div className="hidden xs:flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 flex-shrink-0">
               <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></div>
               <span className="text-xs text-green-400 font-medium hidden sm:inline">Online</span>
             </div>
