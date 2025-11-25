@@ -16,7 +16,7 @@ export function ChatMessage({ role, content, isStreaming = false }: ChatMessageP
   const isAssistant = role === "assistant";
   const isUser = role === "user";
   const [copied, setCopied] = useState(false);
-  const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
+  const [copiedCodeBlocks, setCopiedCodeBlocks] = useState<Set<string>>(new Set());
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(content);
@@ -27,11 +27,30 @@ export function ChatMessage({ role, content, isStreaming = false }: ChatMessageP
   const handleCopyCode = async (code: string, id: string) => {
     try {
       await navigator.clipboard.writeText(code);
-      setCopiedCodeId(id);
-      setTimeout(() => setCopiedCodeId(null), 2000);
+      setCopiedCodeBlocks((prev) => new Set(prev).add(id));
+      setTimeout(() => {
+        setCopiedCodeBlocks((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+      }, 2000);
     } catch (error) {
       console.error("Failed to copy code:", error);
     }
+  };
+
+  // Generate stable ID from code content
+  const generateCodeId = (code: string, index: number = 0): string => {
+    // Create a simple hash from the code content
+    let hash = 0;
+    const str = code.substring(0, 100); // Use first 100 chars for hash
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return `code-${Math.abs(hash)}-${index}`;
   };
 
   return (
@@ -80,7 +99,7 @@ export function ChatMessage({ role, content, isStreaming = false }: ChatMessageP
                   li: ({ children }) => (
                     <li className="pl-2 leading-7">{children}</li>
                   ),
-                  code: ({ children, className, ...props }) => {
+                  code: ({ children, className }) => {
                     const isInline = !className;
                     
                     if (isInline) {
@@ -101,24 +120,31 @@ export function ChatMessage({ role, content, isStreaming = false }: ChatMessageP
                   pre: ({ children }) => {
                     // Extract text content from code element inside pre
                     let codeContent = "";
-                    const extractText = (node: any): string => {
+                    const extractText = (node: unknown): string => {
                       if (typeof node === "string") return node;
                       if (Array.isArray(node)) {
                         return node.map(extractText).join("");
                       }
-                      if (React.isValidElement(node) && node.props?.children) {
-                        return extractText(node.props.children);
+                      if (React.isValidElement(node)) {
+                        const props = node.props as { children?: unknown };
+                        if (props?.children) {
+                          return extractText(props.children);
+                        }
                       }
                       return "";
                     };
                     codeContent = extractText(children).trim();
 
-                    const codeId = `pre-${Math.random().toString(36).substr(2, 9)}`;
-                    const isCopied = copiedCodeId === codeId;
+                    // Generate stable ID based on content
+                    const codeId = generateCodeId(codeContent);
+                    const isCopied = copiedCodeBlocks.has(codeId);
 
                     return (
                       <div className="relative group/pre mb-5">
-                        <div className="absolute top-3 right-3 z-10 opacity-0 group-hover/pre:opacity-100 transition-opacity duration-200">
+                        <div className={cn(
+                          "absolute top-3 right-3 z-10 transition-all duration-200",
+                          isCopied ? "opacity-100" : "opacity-0 group-hover/pre:opacity-100"
+                        )}>
                           <button
                             onClick={(e) => {
                               e.preventDefault();
@@ -126,19 +152,20 @@ export function ChatMessage({ role, content, isStreaming = false }: ChatMessageP
                               handleCopyCode(codeContent, codeId);
                             }}
                             className={cn(
-                              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium",
-                              "bg-gray-800/90 hover:bg-gray-700/90 border border-gray-700/50",
-                              "text-gray-300 hover:text-white transition-all duration-200",
+                              "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold",
+                              "transition-all duration-200",
                               "backdrop-blur-sm shadow-lg",
                               "active:scale-95",
-                              isCopied && "bg-green-500/20 border-green-500/50 text-green-400"
+                              isCopied 
+                                ? "bg-green-500/20 border-2 border-green-500/60 text-green-400 shadow-green-500/20" 
+                                : "bg-gray-800/95 hover:bg-gray-700/95 border border-gray-700/50 text-gray-300 hover:text-white"
                             )}
                             title={isCopied ? "Copied!" : "Copy code"}
                           >
                             {isCopied ? (
                               <>
-                                <Check className="h-3.5 w-3.5" />
-                                <span>Copied</span>
+                                <Check className="h-4 w-4" strokeWidth={2.5} />
+                                <span className="font-semibold">Copied</span>
                               </>
                             ) : (
                               <>

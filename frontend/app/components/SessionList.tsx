@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { MessageSquare, Trash2, Clock } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export interface Session {

@@ -27,8 +27,8 @@ export interface InsightsPanelProps {
 export function InsightsPanel({
   insights,
   recommendations,
-  isCollapsed = false,
-  onToggle,
+  isCollapsed: _isCollapsed = false,
+  onToggle: _onToggle,
 }: InsightsPanelProps) {
   return (
     <aside

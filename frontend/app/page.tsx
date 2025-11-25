@@ -18,11 +18,22 @@ export default function Page() {
   const [insightsWidth, setInsightsWidth] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("insights-panel-width");
-      return saved ? parseInt(saved, 10) : 320; // Default 320px (w-80)
+      return saved ? parseInt(saved, 10) : 400; // Default 400px (wider for better readability)
     }
-    return 320;
+    return 400;
   });
   const [isResizing, setIsResizing] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(false);
+
+  // Check screen size on mount and resize
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsLargeScreen(window.innerWidth >= 1024);
+    };
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
   const { messages, isSending, insights, recommendations, sendMessage, clearChat, newChat, switchSession, sessionId } = useChat();
 
   const handleSendMessage = useCallback(
@@ -65,7 +76,8 @@ export default function Page() {
     const handleMouseUp = () => {
       if (isResizing) {
         setIsResizing(false);
-        localStorage.setItem("insights-panel-width", insightsWidth.toString());
+        const currentWidth = insightsWidth;
+        localStorage.setItem("insights-panel-width", currentWidth.toString());
       }
     };
 
@@ -99,8 +111,12 @@ export default function Page() {
             />
           )}
           <div 
-            className="relative h-full lg:h-auto z-20 animate-in slide-in-from-left duration-300 max-h-screen overflow-hidden"
-            style={{ width: typeof window !== "undefined" && window.innerWidth >= 1024 ? `${insightsWidth}px` : undefined }}
+            className="relative h-full lg:h-auto z-20 max-h-screen overflow-hidden"
+            style={{ 
+              width: isLargeScreen ? `${insightsWidth}px` : undefined,
+              minWidth: isLargeScreen ? `${insightsWidth}px` : undefined,
+              maxWidth: isLargeScreen ? `${insightsWidth}px` : undefined
+            }}
           >
             <InsightsPanel 
               insights={insights} 

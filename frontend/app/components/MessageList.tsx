@@ -33,7 +33,7 @@ export function MessageList({ messages, isTyping = false }: MessageListProps) {
               </h2>
               <p className="text-gray-300 text-sm sm:text-base md:text-lg mb-6 sm:mb-8 leading-relaxed max-w-xl mx-auto px-2">
                 I help you design, plan, and deploy production-ready Cloudflare infrastructure. 
-                Tell me about your project and I'll recommend the best Cloudflare services, 
+                Tell me about your project and I&apos;ll recommend the best Cloudflare services, 
                 architecture patterns, and deployment strategies.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-6 sm:mt-10 text-left max-w-3xl mx-auto">

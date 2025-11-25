@@ -1,8 +1,6 @@
 "use client";
 
 import { Mic, Square, Send } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 export interface ChatInputProps {
@@ -43,7 +41,7 @@ export function ChatInput({
                 <span className="text-xs sm:text-sm text-gray-300 truncate flex-1">
                   Listening...
                   {voiceTranscript && (
-                    <span className="ml-2 text-orange-300 italic">"{voiceTranscript}"</span>
+                    <span className="ml-2 text-orange-300 italic">&ldquo;{voiceTranscript}&rdquo;</span>
                   )}
                 </span>
               </div>

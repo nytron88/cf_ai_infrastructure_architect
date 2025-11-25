@@ -4,18 +4,30 @@ A production-ready AI-powered chat application built on Cloudflare Workers, Dura
 
 ## Features
 
-- **AI-Powered Chat**: Uses Workers AI (`@cf/meta/llama-3.1-8b-instruct`) for intelligent responses
-- **Persistent Memory**: Durable Objects store conversation history per session
+- **AI-Powered Chat**: Uses Workers AI with Llama 3.1 (`@cf/meta/llama-3.1-8b-instruct`) for intelligent responses
+- **Persistent Memory**: Durable Objects store conversation history per session with stateful coordination
 - **Real-time Insights**: AI-generated summaries, decisions, tasks, and follow-ups
 - **Product Recommendations**: Curated Cloudflare product suggestions based on conversations
-- **Modern UI**: Next.js frontend with voice input, typing indicators, and responsive design
+- **Modern UI**: Next.js frontend (Cloudflare Pages) with chat and voice input support
 - **Session Management**: Multiple conversation sessions with persistent storage
+- **Workflow Coordination**: Durable Objects handle state coordination and memory persistence
 
 ## Architecture
 
-- **Worker** (`src/worker.ts`): Cloudflare Worker handling API requests
-- **Memory Store** (`src/memory.ts`): Durable Object for session persistence
-- **Frontend** (`frontend/`): Next.js application with React and TypeScript
+This application implements all required components for the Cloudflare AI assignment:
+
+- **LLM**: Workers AI with Llama 3.1 (`@cf/meta/llama-3.1-8b-instruct`) - Note: Llama 3.3 is not yet available on Workers AI, but 3.1 provides excellent performance
+- **Workflow/Coordination**: Durable Objects (`src/memory.ts`) for stateful coordination and session management
+- **User Input**: 
+  - Chat interface via Next.js frontend
+  - Voice input via Web Speech API (browser-based)
+- **Memory/State**: Durable Objects provide persistent, per-session memory storage
+
+### Components
+
+- **Worker** (`src/worker.ts`): Cloudflare Worker handling API requests, AI inference, and Durable Object coordination
+- **Memory Store** (`src/memory.ts`): Durable Object for session persistence and state management
+- **Frontend** (`frontend/`): Next.js application (deployable to Cloudflare Pages) with React and TypeScript
 
 ## Quick Start
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChatMessage, InsightState, RecommendationState } from "@/app/types/chat";
 import { updateSessionMetadata } from "@/app/components/SessionList";
 
@@ -67,9 +67,19 @@ export function useChat(sessionIdOverride?: string) {
   const [insights, setInsights] = useState<InsightState>(EMPTY_INSIGHTS);
   const [recommendations, setRecommendations] =
     useState<RecommendationState>(EMPTY_RECOMMENDATIONS);
+  const messagesRef = useRef(messages);
+  
+  // Keep ref in sync with state
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   const addMessage = useCallback((role: ChatMessage["role"], content: string) => {
-    setMessages((prev) => [...prev, { role, content }]);
+    setMessages((prev) => {
+      const updated = [...prev, { role, content }];
+      messagesRef.current = updated;
+      return updated;
+    });
   }, []);
 
   const parseResponseBody = async (response: Response) => {
@@ -106,12 +116,14 @@ export function useChat(sessionIdOverride?: string) {
         }
         addMessage("assistant", data.reply);
         
-        // Update session metadata
+        // Update session metadata - use ref to get current message count
         const title = message.slice(0, 50) + (message.length > 50 ? "..." : "");
+        // Calculate count: current messages + user message + assistant reply
+        const messageCount = messagesRef.current.length + 2;
         updateSessionMetadata(sessionId, {
           title,
           lastMessage: data.reply.slice(0, 100) + (data.reply.length > 100 ? "..." : ""),
-          messageCount: messages.length + 2, // +2 for user message and assistant reply
+          messageCount,
         });
         
         if (data.insights) {

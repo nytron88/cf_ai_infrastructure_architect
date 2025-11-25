@@ -22,6 +22,13 @@ export function useSpeechRecognition(
   const [voiceTranscript, setVoiceTranscript] = useState("");
   const [voiceError, setVoiceError] = useState("");
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+  const isStartingRef = useRef(false);
+  const onFinalTranscriptRef = useRef(onFinalTranscript);
+
+  // Keep callback ref updated
+  useEffect(() => {
+    onFinalTranscriptRef.current = onFinalTranscript;
+  }, [onFinalTranscript]);
 
   const describeSpeechError = useCallback((errorCode: string) => {
     switch (errorCode) {
@@ -32,12 +39,29 @@ export function useSpeechRecognition(
       case "audio-capture":
         return "No microphone detected.";
       case "network":
-        return "Speech service network error. Double-check your connection and try again.";
+        return "Speech service network error. Check your connection and try again.";
       case "no-speech":
         return "No speech detected. Please speak louder or try again.";
+      case "aborted":
+        return "Speech recognition was stopped.";
+      case "bad-grammar":
+        return "Speech recognition grammar error.";
       default:
-        return "Microphone error";
+        return `Speech recognition error: ${errorCode}`;
     }
+  }, []);
+
+  const stopRecognition = useCallback(() => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (error) {
+        // Ignore errors when stopping
+      }
+    }
+    setIsListening(false);
+    setVoiceTranscript("");
+    isStartingRef.current = false;
   }, []);
 
   useEffect(() => {
@@ -70,30 +94,60 @@ export function useSpeechRecognition(
         }
       }
 
-      setVoiceTranscript(interim || finalTranscript || "");
+      // Show interim results
+      if (interim) {
+        setVoiceTranscript(interim);
+      }
 
+      // Handle final transcript
       if (finalTranscript.trim()) {
         setVoiceTranscript("");
-        onFinalTranscript(finalTranscript.trim());
+        stopRecognition();
+        // Use ref to avoid stale closure
+        onFinalTranscriptRef.current(finalTranscript.trim());
+      } else if (!interim && finalTranscript) {
+        // If we have final but no interim, still show it briefly
+        setVoiceTranscript(finalTranscript);
       }
     };
 
     recognition.onerror = (event) => {
-      setVoiceError(describeSpeechError(event.error));
-      setIsListening(false);
+      const errorCode = event.error;
+      
+      // Don't show error for "no-speech" if user manually stopped
+      if (errorCode === "no-speech" && !isListening) {
+        return;
+      }
+
+      // Handle specific errors
+      if (errorCode === "not-allowed" || errorCode === "service-not-allowed") {
+        setVoiceError(describeSpeechError(errorCode));
+        stopRecognition();
+      } else if (errorCode === "aborted") {
+        // Aborted is usually fine, just stop
+        stopRecognition();
+      } else {
+        setVoiceError(describeSpeechError(errorCode));
+        stopRecognition();
+      }
     };
 
     recognition.onend = () => {
-      setIsListening(false);
-      setVoiceTranscript("");
+      // Only reset if we're still supposed to be listening
+      // This prevents clearing state when manually stopped
+      if (isListening && !isStartingRef.current) {
+        setIsListening(false);
+        setVoiceTranscript("");
+      }
+      isStartingRef.current = false;
     };
 
     recognitionRef.current = recognition;
 
     return () => {
-      recognition.stop();
+      stopRecognition();
     };
-  }, [describeSpeechError, onFinalTranscript]);
+  }, [describeSpeechError, stopRecognition, isListening]);
 
   const toggleListening = useCallback(() => {
     if (!supportsVoice) {
@@ -104,21 +158,49 @@ export function useSpeechRecognition(
     }
 
     if (isListening) {
-      recognitionRef.current?.stop();
+      // Stop listening
+      stopRecognition();
       return;
     }
 
+    // Start listening
+    if (!recognitionRef.current) {
+      setVoiceError("Speech recognition not available. Please refresh the page.");
+      return;
+    }
+
+    // Clear previous errors and transcript
     setVoiceError("");
     setVoiceTranscript("");
+    isStartingRef.current = true;
 
     try {
-      recognitionRef.current?.start();
+      recognitionRef.current.start();
       setIsListening(true);
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : "Microphone unavailable";
-      setVoiceError(reason);
+    } catch (error: unknown) {
+      isStartingRef.current = false;
+      setIsListening(false);
+      
+      // Handle specific error cases
+      if (error instanceof Error) {
+        if (error.name === "InvalidStateError" || error.message.includes("already started")) {
+          // Recognition is already running, just update state
+          setIsListening(true);
+          return;
+        }
+        setVoiceError(error.message || "Failed to start microphone. Check permissions.");
+      } else {
+        setVoiceError("Failed to start microphone. Check permissions.");
+      }
     }
-  }, [isListening, supportsVoice]);
+  }, [isListening, supportsVoice, stopRecognition]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopRecognition();
+    };
+  }, [stopRecognition]);
 
   return {
     supportsVoice,
