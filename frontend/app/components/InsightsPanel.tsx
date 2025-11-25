@@ -33,7 +33,7 @@ export function InsightsPanel({
   return (
     <aside
       className={cn(
-        "flex-shrink-0 w-full lg:w-80 border-r border-gray-800/50 bg-black/95 backdrop-blur-xl",
+        "flex-shrink-0 w-full lg:w-full border-r border-gray-800/50 bg-black/95 backdrop-blur-xl",
         "p-3 sm:p-4 md:p-6",
         "flex flex-col gap-3 sm:gap-4 md:gap-5",
         "lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto scroll-smooth",

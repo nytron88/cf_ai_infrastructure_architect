@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,11 +16,22 @@ export function ChatMessage({ role, content, isStreaming = false }: ChatMessageP
   const isAssistant = role === "assistant";
   const isUser = role === "user";
   const [copied, setCopied] = useState(false);
+  const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyCode = async (code: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCodeId(id);
+      setTimeout(() => setCopiedCodeId(null), 2000);
+    } catch (error) {
+      console.error("Failed to copy code:", error);
+    }
   };
 
   return (
@@ -68,23 +80,80 @@ export function ChatMessage({ role, content, isStreaming = false }: ChatMessageP
                   li: ({ children }) => (
                     <li className="pl-2 leading-7">{children}</li>
                   ),
-                  code: ({ children, className }) => {
+                  code: ({ children, className, ...props }) => {
                     const isInline = !className;
-                    return isInline ? (
-                      <code className="px-1.5 py-0.5 rounded-md bg-gray-800/60 text-orange-300 text-[14px] font-mono border border-gray-700/50">
-                        {children}
-                      </code>
-                    ) : (
-                      <code className="block p-4 rounded-xl bg-gray-900/80 text-gray-200 text-[14px] font-mono overflow-x-auto border border-gray-800/50 my-4">
+                    
+                    if (isInline) {
+                      return (
+                        <code className="px-1.5 py-0.5 rounded-md bg-gray-800/60 text-orange-300 text-[14px] font-mono border border-gray-700/50">
+                          {children}
+                        </code>
+                      );
+                    }
+
+                    // Block code (wrapped in pre) - styling only, copy handled by pre
+                    return (
+                      <code className="block p-0 text-gray-200 text-[14px] font-mono">
                         {children}
                       </code>
                     );
                   },
-                  pre: ({ children }) => (
-                    <pre className="mb-5 rounded-xl bg-gray-900/80 p-4 overflow-x-auto last:mb-0 border border-gray-800/50">
-                      {children}
-                    </pre>
-                  ),
+                  pre: ({ children }) => {
+                    // Extract text content from code element inside pre
+                    let codeContent = "";
+                    const extractText = (node: any): string => {
+                      if (typeof node === "string") return node;
+                      if (Array.isArray(node)) {
+                        return node.map(extractText).join("");
+                      }
+                      if (React.isValidElement(node) && node.props?.children) {
+                        return extractText(node.props.children);
+                      }
+                      return "";
+                    };
+                    codeContent = extractText(children).trim();
+
+                    const codeId = `pre-${Math.random().toString(36).substr(2, 9)}`;
+                    const isCopied = copiedCodeId === codeId;
+
+                    return (
+                      <div className="relative group/pre mb-5">
+                        <div className="absolute top-3 right-3 z-10 opacity-0 group-hover/pre:opacity-100 transition-opacity duration-200">
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleCopyCode(codeContent, codeId);
+                            }}
+                            className={cn(
+                              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium",
+                              "bg-gray-800/90 hover:bg-gray-700/90 border border-gray-700/50",
+                              "text-gray-300 hover:text-white transition-all duration-200",
+                              "backdrop-blur-sm shadow-lg",
+                              "active:scale-95",
+                              isCopied && "bg-green-500/20 border-green-500/50 text-green-400"
+                            )}
+                            title={isCopied ? "Copied!" : "Copy code"}
+                          >
+                            {isCopied ? (
+                              <>
+                                <Check className="h-3.5 w-3.5" />
+                                <span>Copied</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="h-3.5 w-3.5" />
+                                <span>Copy</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <pre className="rounded-xl bg-gray-900/80 p-4 pr-20 overflow-x-auto last:mb-0 border border-gray-800/50">
+                          {children}
+                        </pre>
+                      </div>
+                    );
+                  },
                   blockquote: ({ children }) => (
                     <blockquote className="border-l-4 border-orange-500/60 pl-5 my-5 italic text-gray-300 bg-gray-900/30 py-2 rounded-r-lg">
                       {children}
