@@ -32,19 +32,19 @@ export function ChatInput({
         {/* Voice Status - Always show when listening */}
         {isListening && (
           <div className="mb-3 sm:mb-4">
-            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg bg-orange-500/20 border-2 border-orange-500 shadow-lg shadow-orange-500/30">
-              <span className="relative flex h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-full w-full bg-orange-500"></span>
+            <div className="flex items-center gap-2.5 sm:gap-3 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-lg bg-orange-500/8 border border-orange-500/30 backdrop-blur-sm">
+              <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5 flex-shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400/60 opacity-60"></span>
+                <span className="relative inline-flex rounded-full h-full w-full bg-orange-500/80"></span>
               </span>
-              <span className="text-sm sm:text-base text-orange-200 font-semibold flex-1">
+              <span className="text-sm sm:text-[15px] text-gray-300 font-medium flex-1">
                 {voiceTranscript ? (
                   <>
-                    <span className="text-white">Listening:</span>{" "}
-                    <span className="italic">&ldquo;{voiceTranscript}&rdquo;</span>
+                    <span className="text-gray-400">Listening:</span>{" "}
+                    <span className="text-white italic">&ldquo;{voiceTranscript}&rdquo;</span>
                   </>
                 ) : (
-                  "Start speaking..."
+                  <span className="text-gray-300">Start speaking...</span>
                 )}
               </span>
             </div>
@@ -53,8 +53,8 @@ export function ChatInput({
         {/* Show transcript after recognition completes */}
         {!isListening && voiceTranscript && (
           <div className="mb-3 sm:mb-4 animate-in fade-in slide-in-from-bottom-2 duration-200">
-            <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-orange-500/10 border border-orange-500/20">
-              <span className="text-xs sm:text-sm text-orange-300 italic flex-1">&ldquo;{voiceTranscript}&rdquo;</span>
+            <div className="flex items-center gap-2 sm:gap-3 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-orange-500/6 border border-orange-500/15 backdrop-blur-sm">
+              <span className="text-xs sm:text-sm text-gray-300 italic flex-1">&ldquo;{voiceTranscript}&rdquo;</span>
             </div>
           </div>
         )}
@@ -119,15 +119,15 @@ export function ChatInput({
                     "flex items-center justify-center transition-all duration-200",
                     "disabled:opacity-50 disabled:cursor-not-allowed",
                     isListening 
-                      ? "h-10 w-10 sm:h-11 sm:w-11 bg-orange-500 text-white hover:bg-orange-600 shadow-lg shadow-orange-500/30"
-                      : "h-8 w-8 sm:h-9 sm:w-9 text-gray-400 hover:text-white hover:bg-gray-800/50 active:scale-95"
+                      ? "h-9 w-9 sm:h-10 sm:w-10 bg-orange-500/90 text-white hover:bg-orange-500 shadow-md shadow-orange-500/20 backdrop-blur-sm"
+                      : "h-8 w-8 sm:h-9 sm:w-9 text-gray-400 hover:text-gray-300 hover:bg-gray-800/40 active:scale-95"
                   )}
                   aria-label={isListening ? "Stop listening" : "Start voice input"}
                 >
                   {isListening ? (
-                    <Square className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={2.5} />
+                    <Square className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={2} />
                   ) : (
-                    <Mic className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <Mic className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={2} />
                   )}
                 </button>
               )}
