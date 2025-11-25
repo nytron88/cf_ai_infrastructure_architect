@@ -1,18 +1,21 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Sparkles } from "lucide-react";
 import { ChatMessage, ChatMessageProps } from "./ChatMessage";
+import { TypingIndicator } from "./TypingIndicator";
 
 export interface MessageListProps {
   messages: ChatMessageProps[];
+  isTyping?: boolean;
 }
 
-export function MessageList({ messages }: MessageListProps) {
+export function MessageList({ messages, isTyping = false }: MessageListProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isTyping]);
 
   return (
     <div className="h-full overflow-y-auto bg-black scroll-smooth">
@@ -57,6 +60,7 @@ export function MessageList({ messages }: MessageListProps) {
             {messages.map((message, index) => (
               <ChatMessage key={`${message.role}-${index}`} {...message} />
             ))}
+            {isTyping && <TypingIndicator />}
             <div ref={messagesEndRef} className="h-4" />
           </>
         )}

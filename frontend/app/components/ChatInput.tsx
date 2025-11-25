@@ -30,7 +30,7 @@ export function ChatInput({
 }: ChatInputProps) {
   return (
     <div className="border-t border-gray-800/50 bg-black/95 backdrop-blur-xl">
-      <div className="max-w-4xl mx-auto px-6 py-5">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-5">
         {/* Voice Status */}
         {(isListening || voiceTranscript || voiceError) && (
           <div className="mb-4 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
@@ -119,23 +119,23 @@ export function ChatInput({
             type="submit"
             disabled={isSending || !input.trim()}
             className={cn(
-              "h-[56px] px-6 rounded-2xl",
+              "h-[56px] px-4 sm:px-6 rounded-2xl",
               "bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600",
               "text-white font-medium text-[15px]",
               "disabled:opacity-40 disabled:cursor-not-allowed",
               "transition-all duration-200 hover:shadow-lg hover:shadow-orange-500/20",
-              "flex items-center justify-center gap-2 min-w-[100px]"
+              "flex items-center justify-center gap-2 min-w-[80px] sm:min-w-[100px]"
             )}
           >
             {isSending ? (
               <>
                 <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
-                <span>Sending</span>
+                <span className="hidden sm:inline">Sending</span>
               </>
             ) : (
               <>
                 <Send className="h-4 w-4" />
-                <span>Send</span>
+                <span className="hidden sm:inline">Send</span>
               </>
             )}
           </button>

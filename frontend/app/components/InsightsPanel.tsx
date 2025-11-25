@@ -33,8 +33,8 @@ export function InsightsPanel({
   return (
     <aside
       className={cn(
-        "flex-shrink-0 w-full lg:w-80 border-r border-gray-800/50 bg-black/95 backdrop-blur-xl p-6",
-        "flex flex-col gap-5",
+        "flex-shrink-0 w-full lg:w-80 border-r border-gray-800/50 bg-black/95 backdrop-blur-xl p-4 sm:p-6",
+        "flex flex-col gap-4 sm:gap-5",
         "lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto scroll-smooth",
         isCollapsed && "lg:w-16"
       )}
@@ -133,16 +133,14 @@ export function InsightsPanel({
         </>
       )}
 
-      {/* Collapse Toggle */}
+      {/* Mobile Close Button */}
       {onToggle && (
         <button
           onClick={onToggle}
-          className="lg:hidden mt-auto p-2 rounded-lg border border-white/10 bg-gray-900/50 hover:bg-gray-800/50 transition-colors"
-          aria-label={isCollapsed ? "Expand panel" : "Collapse panel"}
+          className="lg:hidden mt-auto p-3 rounded-lg border border-gray-800/50 bg-gray-900/50 hover:bg-gray-800/50 transition-colors text-gray-400 hover:text-white"
+          aria-label="Close panel"
         >
-          <span className="text-gray-400 text-xs">
-            {isCollapsed ? "→" : "←"}
-          </span>
+          <span className="text-sm font-medium">Close</span>
         </button>
       )}
     </aside>

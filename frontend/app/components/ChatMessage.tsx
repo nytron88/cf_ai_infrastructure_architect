@@ -1,25 +1,35 @@
 "use client";
 
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface ChatMessageProps {
   role: "user" | "assistant" | "system";
   content: string;
+  isStreaming?: boolean;
 }
 
-export function ChatMessage({ role, content }: ChatMessageProps) {
+export function ChatMessage({ role, content, isStreaming = false }: ChatMessageProps) {
   const isAssistant = role === "assistant";
   const isUser = role === "user";
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div
       className={cn(
-        "group w-full transition-opacity duration-200",
+        "group w-full transition-all duration-300 animate-in fade-in slide-in-from-bottom-2",
         isUser ? "bg-gray-900/20" : "bg-transparent"
       )}
     >
-      <div className="flex gap-4 max-w-4xl mx-auto px-6 py-8">
+      <div className="flex gap-3 sm:gap-4 max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Avatar */}
         <div className="flex-shrink-0">
           {isAssistant ? (
@@ -106,8 +116,37 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
               >
                 {content}
               </ReactMarkdown>
+              {isStreaming && (
+                <span className="inline-block w-2 h-4 ml-1 bg-orange-400 animate-pulse" />
+              )}
             </div>
           </div>
+          {/* Copy Button */}
+          {isAssistant && (
+            <button
+              onClick={handleCopy}
+              className={cn(
+                "mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg",
+                "text-xs text-gray-400 hover:text-gray-200",
+                "bg-gray-800/50 hover:bg-gray-800/80 border border-gray-700/50",
+                "transition-all duration-200"
+              )}
+              title="Copy message"
+            >
+              {copied ? (
+                <>
+                  <Check className="h-3 w-3 text-green-400" />
+                  <span className="text-green-400">Copied</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3 w-3" />
+                  <span>Copy</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>

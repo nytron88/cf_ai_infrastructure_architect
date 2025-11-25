@@ -1,16 +1,20 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ChatHeader } from "./components/ChatHeader";
 import { ChatInput } from "./components/ChatInput";
 import { MessageList } from "./components/MessageList";
 import { InsightsPanel } from "./components/InsightsPanel";
+import { SessionList } from "./components/SessionList";
 import { useChat } from "./hooks/useChat";
 import { useSpeechRecognition } from "./hooks/useSpeechRecognition";
 
 export default function Page() {
   const [input, setInput] = useState("");
-  const { messages, isSending, insights, recommendations, sendMessage } = useChat();
+  // Use state only for mobile overlay, CSS handles desktop visibility
+  const [showInsightsMobile, setShowInsightsMobile] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const { messages, isSending, insights, recommendations, sendMessage, clearChat, newChat, switchSession, sessionId } = useChat();
 
   const handleSendMessage = useCallback(
     (message: string) => {
@@ -42,15 +46,41 @@ export default function Page() {
     <div className="min-h-screen bg-black">
       <div className="flex h-screen overflow-hidden">
         {/* Sidebar - Insights Panel */}
-        <div className="hidden lg:block">
-          <InsightsPanel insights={insights} recommendations={recommendations} />
+        {/* Always render, use CSS for visibility - prevents hydration mismatch */}
+        <div className={showInsightsMobile ? "block absolute inset-0 z-20 lg:relative lg:z-auto lg:block" : "hidden lg:block"}>
+          {showInsightsMobile && (
+            <div className="absolute inset-0 bg-black/50 lg:hidden z-10" onClick={() => setShowInsightsMobile(false)} />
+          )}
+          <div className="relative h-full lg:h-auto z-20">
+            <InsightsPanel 
+              insights={insights} 
+              recommendations={recommendations}
+              isCollapsed={!showInsightsMobile}
+              onToggle={() => setShowInsightsMobile(!showInsightsMobile)}
+            />
+          </div>
         </div>
+
+        {/* Session History Panel */}
+        <SessionList
+          currentSessionId={sessionId}
+          onSelectSession={switchSession}
+          onDeleteSession={() => {}}
+          isOpen={showHistory}
+          onClose={() => setShowHistory(false)}
+        />
 
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col min-w-0 bg-black">
-          <ChatHeader />
+          <ChatHeader 
+            onNewChat={newChat}
+            onClearChat={clearChat}
+            onToggleInsights={() => setShowInsightsMobile(!showInsightsMobile)}
+            onToggleHistory={() => setShowHistory(!showHistory)}
+            messageCount={messages.filter(m => m.role !== "assistant" || messages.indexOf(m) > 0).length}
+          />
           <div className="flex-1 overflow-hidden relative">
-            <MessageList messages={messages} />
+            <MessageList messages={messages} isTyping={isSending} />
           </div>
           <ChatInput
             input={input}

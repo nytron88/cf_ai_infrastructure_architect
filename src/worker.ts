@@ -28,9 +28,27 @@ export interface Env {
   AI: AiService;
   MEMORY_SESSIONS: DurableObjectNamespace;
   MODEL_ID?: string;
+  ALLOWED_ORIGINS?: string; // Comma-separated list of allowed origins
 }
 
-const allowOrigin = (request: Request) => request.headers.get("origin") || "*";
+const allowOrigin = (request: Request, env: Env): string | null => {
+  const origin = request.headers.get("origin");
+  if (!origin) {
+    return null;
+  }
+  
+  // If ALLOWED_ORIGINS is set, check against the list
+  if (env.ALLOWED_ORIGINS) {
+    const allowed = env.ALLOWED_ORIGINS.split(",").map(o => o.trim());
+    if (allowed.includes(origin) || allowed.includes("*")) {
+      return origin;
+    }
+    return null;
+  }
+  
+  // Default: allow all origins (for development)
+  return origin;
+};
 
 const SYSTEM_PROMPT = `You are the Cloudflare Agents Solutions Architect bot. 
 Help builders design purposeful automations across Workers AI, Durable Objects, Vectorize, Workflows, and MCP tools.
@@ -102,29 +120,48 @@ const isParsedProduct = (entry: unknown): entry is ParsedProduct => {
 
 type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 
-const jsonHeaders = (request: Request) => ({
-  "content-type": "application/json; charset=UTF-8",
-  "cache-control": "no-store",
-  "access-control-allow-origin": allowOrigin(request),
-  "access-control-allow-headers": "Content-Type, Authorization",
-  "access-control-allow-methods": "GET,POST,OPTIONS",
-  "access-control-allow-credentials": "true",
-});
+const getCorsHeaders = (request: Request, env: Env): Record<string, string> => {
+  const origin = request.headers.get("origin") || "*";
+  const allowedOrigin = allowOrigin(request, env);
+  const corsOrigin = allowedOrigin || (origin !== "*" ? origin : "*");
+  
+  const headers: Record<string, string> = {
+    "access-control-allow-origin": corsOrigin,
+    "access-control-allow-methods": "GET, POST, OPTIONS",
+    "access-control-allow-headers": "Content-Type, Authorization, X-Requested-With",
+    "access-control-max-age": "86400",
+  };
+  
+  if (corsOrigin !== "*") {
+    headers["access-control-allow-credentials"] = "true";
+  }
+  
+  return headers;
+};
+
+const jsonHeaders = (request: Request, env: Env): Record<string, string> => {
+  return {
+    "content-type": "application/json; charset=UTF-8",
+    "cache-control": "no-store",
+    ...getCorsHeaders(request, env),
+  };
+};
 
 const jsonResponse = (
   body: JsonValue | Record<string, unknown> | string,
   request: Request,
+  env: Env,
   init?: ResponseInit
 ) => {
   const payload = typeof body === "string" ? body : JSON.stringify(body, null, 2);
   return new Response(payload, {
-    headers: jsonHeaders(request),
+    headers: jsonHeaders(request, env),
     ...init,
   });
 };
 
-const errorResponse = (message: string, request: Request, status = 400) =>
-  jsonResponse({ error: message }, request, { status });
+const errorResponse = (message: string, request: Request, env: Env, status = 400) =>
+  jsonResponse({ error: message }, request, env, { status });
 
 const sanitizeHistory = (history: unknown): ChatMessage[] => {
   if (!Array.isArray(history)) return [];
@@ -138,38 +175,78 @@ const sanitizeHistory = (history: unknown): ChatMessage[] => {
   });
 };
 
-const getSessionStub = (env: Env, sessionId: string): DurableObjectStub => {
-  const id = env.MEMORY_SESSIONS.idFromName(sessionId);
-  return env.MEMORY_SESSIONS.get(id);
+const getSessionStub = (env: Env, sessionId: string): DurableObjectStub | null => {
+  try {
+    if (!env.MEMORY_SESSIONS) {
+      return null;
+    }
+    const id = env.MEMORY_SESSIONS.idFromName(sessionId);
+    return env.MEMORY_SESSIONS.get(id);
+  } catch (error) {
+    console.error("Failed to get session stub:", error);
+    return null;
+  }
 };
 
-const loadSessionState = async (stub: DurableObjectStub): Promise<SessionState> => {
-  const resp = await stub.fetch("https://memory/state");
-  if (!resp.ok) {
+const loadSessionState = async (stub: DurableObjectStub | null): Promise<SessionState> => {
+  if (!stub) {
     return {
       history: [],
       insights: { ...DEFAULT_INSIGHTS },
       recommendations: { ...DEFAULT_RECOMMENDATIONS },
     };
   }
-  const data = (await resp.json()) as Partial<SessionState>;
-  return {
-    history: sanitizeHistory(data.history),
-    insights: { ...DEFAULT_INSIGHTS, ...(data.insights || {}) },
-    recommendations: { ...DEFAULT_RECOMMENDATIONS, ...(data.recommendations || {}) },
-  };
+  
+  try {
+    const resp = await stub.fetch("https://memory/state", {
+      method: "GET",
+    });
+    if (!resp.ok) {
+      return {
+        history: [],
+        insights: { ...DEFAULT_INSIGHTS },
+        recommendations: { ...DEFAULT_RECOMMENDATIONS },
+      };
+    }
+    const data = (await resp.json()) as Partial<SessionState>;
+    return {
+      history: sanitizeHistory(data.history),
+      insights: { ...DEFAULT_INSIGHTS, ...(data.insights || {}) },
+      recommendations: { ...DEFAULT_RECOMMENDATIONS, ...(data.recommendations || {}) },
+    };
+  } catch (error) {
+    // If we can't load state, return defaults
+    console.error("Failed to load session state:", error);
+    return {
+      history: [],
+      insights: { ...DEFAULT_INSIGHTS },
+      recommendations: { ...DEFAULT_RECOMMENDATIONS },
+    };
+  }
 };
 
 const persistSessionState = async (
-  stub: DurableObjectStub,
+  stub: DurableObjectStub | null,
   state: SessionState,
   request: Request
 ) => {
-  await stub.fetch("https://memory/state", {
-    method: "POST",
-    headers: jsonHeaders(request),
-    body: JSON.stringify(state),
-  });
+  if (!stub) {
+    console.warn("No Durable Object stub available, skipping persistence");
+    return;
+  }
+  
+  try {
+    await stub.fetch("https://memory/state", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(state),
+    });
+  } catch (error) {
+    console.error("Failed to persist session state:", error);
+    // Don't throw - we can continue even if persistence fails
+  }
 };
 
 const docsForProduct = (name: string) => {
@@ -202,7 +279,8 @@ const buildInsights = async (
   history: ChatMessage[],
   previousInsights: Insights
 ): Promise<Insights> => {
-  if (!history.length) return { ...DEFAULT_INSIGHTS };
+  if (!history.length || !env.AI) return previousInsights;
+  
   const recent = history.slice(-12);
   const modelId = env.MODEL_ID || "@cf/meta/llama-3.1-8b-instruct";
   try {
@@ -226,7 +304,8 @@ const buildInsights = async (
       followups: Array.isArray(parsed.followups) ? parsed.followups : previousInsights.followups,
       lastUpdated: new Date().toISOString(),
     };
-  } catch {
+  } catch (error) {
+    console.error("Failed to build insights:", error);
     return previousInsights;
   }
 };
@@ -236,7 +315,8 @@ const buildRecommendations = async (
   history: ChatMessage[],
   previous: Recommendations
 ): Promise<Recommendations> => {
-  if (!history.length) return { ...DEFAULT_RECOMMENDATIONS };
+  if (!history.length || !env.AI) return previous;
+  
   const recent = history.slice(-10);
   const modelId = env.MODEL_ID || "@cf/meta/llama-3.1-8b-instruct";
   try {
@@ -268,59 +348,100 @@ const buildRecommendations = async (
       workflows,
       lastUpdated: new Date().toISOString(),
     };
-  } catch {
+  } catch (error) {
+    console.error("Failed to build recommendations:", error);
     return previous;
   }
 };
 
 const handleMemoryRequest = async (request: Request, env: Env) => {
-  const url = new URL(request.url);
-  const sessionId = url.searchParams.get("session") || "default";
-  const stub = getSessionStub(env, sessionId);
-  const state = await loadSessionState(stub);
-  return jsonResponse({ sessionId, ...state }, request);
+  try {
+    const url = new URL(request.url);
+    const sessionId = url.searchParams.get("session") || "default";
+    const stub = getSessionStub(env, sessionId);
+    const state = await loadSessionState(stub);
+    return jsonResponse({ sessionId, ...state }, request, env);
+  } catch (error) {
+    console.error("Error in handleMemoryRequest:", error);
+    return errorResponse(
+      `Failed to load memory: ${error instanceof Error ? error.message : String(error)}`,
+      request,
+      env,
+      500
+    );
+  }
 };
 
 const handleRecommendationsRequest = async (request: Request, env: Env) => {
-  const url = new URL(request.url);
-  const sessionId = url.searchParams.get("session") || "default";
-  const stub = getSessionStub(env, sessionId);
-  const state = await loadSessionState(stub);
-  return jsonResponse({ sessionId, recommendations: state.recommendations }, request);
+  try {
+    const url = new URL(request.url);
+    const sessionId = url.searchParams.get("session") || "default";
+    const stub = getSessionStub(env, sessionId);
+    const state = await loadSessionState(stub);
+    return jsonResponse({ sessionId, recommendations: state.recommendations }, request, env);
+  } catch (error) {
+    console.error("Error in handleRecommendationsRequest:", error);
+    return errorResponse(
+      `Failed to load recommendations: ${error instanceof Error ? error.message : String(error)}`,
+      request,
+      env,
+      500
+    );
+  }
 };
 
 const handleInsightsRequest = async (request: Request, env: Env) => {
-  const url = new URL(request.url);
-  const sessionId = url.searchParams.get("session") || "default";
-  const stub = getSessionStub(env, sessionId);
-  const state = await loadSessionState(stub);
-  return jsonResponse({ sessionId, insights: state.insights }, request);
+  try {
+    const url = new URL(request.url);
+    const sessionId = url.searchParams.get("session") || "default";
+    const stub = getSessionStub(env, sessionId);
+    const state = await loadSessionState(stub);
+    return jsonResponse({ sessionId, insights: state.insights }, request, env);
+  } catch (error) {
+    console.error("Error in handleInsightsRequest:", error);
+    return errorResponse(
+      `Failed to load insights: ${error instanceof Error ? error.message : String(error)}`,
+      request,
+      env,
+      500
+    );
+  }
 };
 
 const handleChatRequest = async (request: Request, env: Env) => {
   if (request.method !== "POST") {
-    return errorResponse("Use POST for /chat", request, 405);
+    return errorResponse("Use POST for /chat", request, env, 405);
   }
+  
   let payload: { message?: string; sessionId?: string } = {};
   try {
     payload = await request.json();
-  } catch {
-    return errorResponse("Invalid JSON body", request);
+  } catch (error) {
+    console.error("Error parsing request body:", error);
+    return errorResponse("Invalid JSON body", request, env);
   }
+  
   const message = payload.message?.trim();
   if (!message) {
-    return errorResponse("message is required", request);
+    return errorResponse("message is required", request, env);
   }
+  
   const sessionId =
     payload.sessionId?.toString()?.trim() || request.headers.get("cf-connecting-ip") || "default";
+  
   const stub = getSessionStub(env, sessionId);
   const state = await loadSessionState(stub);
+  
   const history = state.history;
   const modelMessages = [
     { role: "system", content: SYSTEM_PROMPT },
     ...history,
     { role: "user", content: message },
   ];
+
+  if (!env.AI) {
+    return errorResponse("AI binding not available", request, env, 503);
+  }
 
   const modelId = env.MODEL_ID || "@cf/meta/llama-3.1-8b-instruct";
   let aiResponse = "";
@@ -333,7 +454,8 @@ const handleChatRequest = async (request: Request, env: Env) => {
       JSON.stringify(result);
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err);
-    return errorResponse(`AI call failed: ${reason}`, request, 500);
+    console.error("AI call error:", reason);
+    return errorResponse(`AI call failed: ${reason}`, request, env, 500);
   }
 
   const trimmedResponse = aiResponse.trim() || "I am not sure how to respond.";
@@ -366,40 +488,111 @@ const handleChatRequest = async (request: Request, env: Env) => {
       insights,
       recommendations,
     },
-    request
+    request,
+    env
   );
+};
+
+const handleOptionsRequest = (request: Request, env: Env): Response => {
+  const corsHeaders = getCorsHeaders(request, env);
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders,
+  });
 };
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    const url = new URL(request.url);
-    if (request.method === "OPTIONS") {
-      return new Response(null, { headers: jsonHeaders(request) });
-    }
-    switch (url.pathname) {
-      case "/chat":
-        return handleChatRequest(request, env);
-      case "/memory":
-        return handleMemoryRequest(request, env);
-      case "/insights":
-        return handleInsightsRequest(request, env);
-      case "/recommendations":
-        return handleRecommendationsRequest(request, env);
-      case "/health":
-        return new Response("ok", {
-          headers: { "access-control-allow-origin": allowOrigin(request) },
-        });
-      default:
-        return jsonResponse(
-          {
-            message: "CF AI Infrastructure Architect Worker",
-            endpoints: ["/chat", "/memory", "/insights", "/recommendations", "/health"],
+    if (!env) {
+      return new Response(
+        JSON.stringify({ error: "Worker environment not available" }),
+        {
+          status: 503,
+          headers: {
+            "content-type": "application/json",
+            "access-control-allow-origin": "*",
           },
-          request
+        }
+      );
+    }
+
+    // Handle OPTIONS requests
+    if (request.method === "OPTIONS") {
+      return handleOptionsRequest(request, env);
+    }
+
+    // Health check
+    try {
+      const url = new URL(request.url);
+      if (url.pathname === "/health") {
+        return new Response("ok", {
+          headers: {
+            "content-type": "text/plain",
+            ...getCorsHeaders(request, env),
+          },
+        });
+      }
+    } catch {
+      // If URL parsing fails, continue
+    }
+
+    try {
+      const url = new URL(request.url);
+      
+      let response: Response;
+      try {
+        switch (url.pathname) {
+          case "/chat":
+            response = await handleChatRequest(request, env);
+            break;
+          case "/memory":
+            response = await handleMemoryRequest(request, env);
+            break;
+          case "/insights":
+            response = await handleInsightsRequest(request, env);
+            break;
+          case "/recommendations":
+            response = await handleRecommendationsRequest(request, env);
+            break;
+          case "/health":
+            response = new Response("ok", {
+              headers: {
+                "content-type": "text/plain",
+                ...getCorsHeaders(request, env),
+              },
+            });
+            break;
+          default:
+            response = jsonResponse(
+              {
+                message: "CF AI Infrastructure Architect Worker",
+                endpoints: ["/chat", "/memory", "/insights", "/recommendations", "/health"],
+              },
+              request,
+              env
+            );
+        }
+      } catch (error) {
+        console.error("Error in route handler:", error);
+        response = jsonResponse(
+          { error: error instanceof Error ? error.message : "Internal server error" },
+          request,
+          env,
+          { status: 500 }
         );
+      }
+      
+      return response;
+    } catch (error) {
+      console.error("Error in fetch handler:", error);
+      return jsonResponse(
+        { error: error instanceof Error ? error.message : "Internal server error" },
+        request,
+        env,
+        { status: 500 }
+      );
     }
   },
 };
 
 export { MemoryStore };
-
