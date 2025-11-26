@@ -25,6 +25,7 @@ This application implements all required components for the Cloudflare AI assign
 - **User Input**: 
   - Chat interface via Next.js frontend
   - Voice input via Web Speech API (browser-based)
+  - **Note:** Voice mode may only work on Chrome or Edge browsers
 - **Memory/State**: Durable Objects provide persistent, per-session memory storage
 
 ### Components
