@@ -70,6 +70,22 @@ export function ChatHeader({ onNewChat, onClearChat, messageCount = 0, onToggleI
                 <span className="hidden md:inline text-xs">History</span>
               </Button>
             )}
+            {onNewChat && (
+              <Button
+                onClick={onNewChat}
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "sm:hidden h-10 w-10 p-0 text-gray-400 hover:text-white",
+                  "hover:bg-gray-800/50 border border-gray-800/50",
+                  "transition-all duration-200 hover:scale-105 active:scale-95",
+                  "flex items-center justify-center rounded-lg"
+                )}
+                aria-label="Start new chat"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            )}
             <div className="hidden sm:flex items-center gap-2">
               {onNewChat && (
                 <Button

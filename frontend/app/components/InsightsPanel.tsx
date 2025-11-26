@@ -43,14 +43,25 @@ export function InsightsPanel({
     >
           {/* Header */}
       <div className="flex flex-col gap-2 sm:gap-3 pb-3 sm:pb-4 md:pb-5 border-b border-gray-800/50 animate-in fade-in slide-in-from-left duration-300">
-            <div>
-              <p className="text-xs text-gray-500 mb-1.5 sm:mb-2 uppercase tracking-wider font-medium">
-                Architecture Brief
-              </p>
-              <h2 className="text-base sm:text-lg font-semibold text-white mb-1">Project Overview</h2>
-              <p className="text-xs text-gray-400 leading-relaxed hidden sm:block">
-                Key decisions, tasks, and recommended Cloudflare stack.
-              </p>
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-xs text-gray-500 mb-1.5 sm:mb-2 uppercase tracking-wider font-medium">
+                  Architecture Brief
+                </p>
+                <h2 className="text-base sm:text-lg font-semibold text-white mb-1">Project Overview</h2>
+                <p className="text-xs text-gray-400 leading-relaxed hidden sm:block">
+                  Key decisions, tasks, and recommended Cloudflare stack.
+                </p>
+              </div>
+              {_onToggle && (
+                <button
+                  onClick={_onToggle}
+                  className="lg:hidden h-10 w-10 p-0 text-gray-400 hover:text-white hover:bg-gray-800/50 border border-gray-800/50 transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center rounded-lg"
+                  aria-label="Close insights panel"
+                >
+                  <span className="text-lg leading-none">✕</span>
+                </button>
+              )}
             </div>
             {insights.lastUpdated && (
               <div className="flex items-center gap-2 text-xs text-orange-400">
@@ -143,16 +154,6 @@ export function InsightsPanel({
             </section>
           )}
 
-      {/* Mobile Close Button */}
-      {_onToggle && (
-        <button
-          onClick={_onToggle}
-          className="lg:hidden mt-auto p-3 rounded-lg border border-gray-800/50 bg-gray-900/50 hover:bg-gray-800/50 transition-all duration-200 hover:scale-105 active:scale-95 text-gray-400 hover:text-white"
-          aria-label="Close panel"
-        >
-          <span className="text-sm font-medium">Close</span>
-        </button>
-      )}
     </aside>
   );
 }
